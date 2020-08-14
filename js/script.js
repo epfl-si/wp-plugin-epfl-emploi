@@ -161,8 +161,8 @@ emploiFrame = jQuery( '<iframe src="' + src + '" name="' + document.location.hre
 * This will be used to resize iframe (if size has changed). */
 window.addEventListener('message', function(e)
 {
-    /* Extracting height from received message */
-    var h = Number( e.data.replace( /.*if_height=(\d+)(?:&|$)/, '$1' ) );
+    /* Extracting height from received message, as decimal value */
+    var h = Number( e.data.replace( /.*if_height=(\d+)(\.\d+)?(?:&|$)/, '$1' ) );
 
     if (!isNaN( h ) && h > 0 && h !== if_height)
     {
