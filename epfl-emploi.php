@@ -44,22 +44,8 @@ function epfl_emploi_process_shortcode( $atts, $content = null ) {
         $lang = 'en';
     }
 
-
-    /* Including CSS file*/
-    wp_enqueue_style( 'epfl_emploi_style', plugin_dir_url(__FILE__).'css/style.css' );
-
-    if($filter_pos == 'left')
-    {
-        wp_enqueue_style( 'epfl_emploi_filter_style', plugin_dir_url(__FILE__).'css/style-filter-left.css' );
-    }
-    else
-    {
-        wp_enqueue_style( 'epfl_emploi_filter_style', plugin_dir_url(__FILE__).'css/style-filter-top.css' );
-    }
-
-    /* Including Script */
-    wp_enqueue_script( 'epfl_emploi_filter_array_emulate', plugin_dir_url(__FILE__).'js/prototype-filter-emulate.js' );
-    wp_enqueue_script( 'epfl_emploi_script', plugin_dir_url(__FILE__).'js/script.js' );
+    wp_enqueue_style( 'epfl_emploi_filter_style', plugin_dir_url(__FILE__).'css/style.css' );
+    wp_enqueue_script( 'epfl_emploi_list_js', plugin_dir_url(__FILE__).'js/list.min.js' );
 
     /* We have to remove all URL parameters named 'searchPosition' to have 'searchPositionUrl' value for JS */
     $url_query = parse_url($url, PHP_URL_QUERY);
@@ -76,64 +62,109 @@ function epfl_emploi_process_shortcode( $atts, $content = null ) {
     $url_search_position = str_replace($url_query, $new_url_query, $url);
 
     ob_start();
-
-    /* If filters must appears on the left, */
-    if($filter_pos=='left')
-    {
 ?>
-<div class="container">
 
-    <div class="search-filters">
-<?PHP } ?>
-
-        <div class="panel-content keywords-panel form">
-            <input id="id_keywords" name="keywords" type="text" />
-            <button class="themed search-button keywords-button" name="search" onclick="onSelectionChanged()">
-                <span class="icon-search">&nbsp;</span>
-            </button>
+<div class="container my-3">
+  <div id="job-offers-list" class="d-flex flex-column">
+    <div class="form-group">
+      <div class="col">
+        <input
+                type="text"
+                id="job-offers-search-input"
+                class="form-control search mb-2"
+                placeholder="<?= __('Search for a specific job offer...', 'epfl-emploi') ?>"
+                aria-describedby="job-offers-search-input"
+        >
+      </div>
+      <div id="selects-filter" class="d-flex flex-wrap flex-column flex-md-row mb-2">
+        <div class="col-md-3">
+          <select id="select-fonction" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Functions', 'epfl-emploi'); ?>">
+            <option value="Administrative Staff">Administrative Staff</option>
+            <option value="IT Staff">IT Staff</option>
+            <option value="Technical Staff">Technical Staff</option>
+            <option value="Management">Management</option>
+          </select>
         </div>
 
-        <div aria-expanded="true" aria-hidden="false" aria-labelledby="toggle-1" class="list-unstyled toggle-expanded" id="toggle-pane-0">&nbsp;</div>
-
-        <div class="toolbar-emploi actu-advanced-search-toolbar ui-toolbar" data-widget="toolbar" role="toolbar">
-            <button class="toolbar-item" name="search" onclick="onSelectionChanged()" role="button" tabindex="0"><?PHP echo __('Search', 'epfl-emploi'); ?></button>
-            <button class="toolbar-item right" onclick="reset()"><?PHP echo __('Reset', 'epfl-emploi'); ?></button>
-
-            <!-- URLs -->
-            <input type="hidden" id="EPFLEmploiDefaultUrl" value="<?PHP echo $url; ?>">
-            <input type="hidden" id="EPFLEmploiSearchPositionUrl" value="<?PHP echo $url_search_position; ?>">
-
-            <!-- Parameters -->
-            <input type="hidden" id="EPFLEmploiExceptPositions" value="<?PHP echo $except_positions; ?>">
-
-
-            <!-- Lang & Translations -->
-            <input type="hidden" id="EPFLEmploiLang" value="<?PHP echo $lang_to_id[$lang]; ?>">
-            <input type="hidden" id="EPFLEmploiTransFunction" value="<?PHP echo esc_attr__('Function', 'epfl-emploi'); ?>">
-            <input type="hidden" id="EPFLEmploiTransLocation" value="<?PHP echo esc_attr__('Location', 'epfl-emploi'); ?>">
-            <input type="hidden" id="EPFLEmploiTransWorkRate" value="<?PHP echo esc_attr__('Work Rate', 'epfl-emploi'); ?>">
-            <input type="hidden" id="EPFLEmploiTransEmplTerm" value="<?PHP echo esc_attr__('Term of employment', 'epfl-emploi'); ?>">
+        <div class="col-md-3">
+          <select id="select-lieu" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Location', 'epfl-emploi'); ?>">
+            <option value="Lausanne">Lausanne</option>
+            <option value="Geneva">Geneva</option>
+            <option value="Fribourg">Fribourg</option>
+            <option value="Neuchâtel">Neuchâtel</option>
+            <option value="Sion">Sion</option>
+            <option value="Basel">Basel</option>
+            <option value="Villigen">Villigen</option>
+          </select>
         </div>
 
-<?PHP
-/* If filters must appears on the left, */
-    if($filter_pos=='left')
-    {
-?>
+        <div class="col-md-3">
+          <select id="select-taux" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Work Rate', 'epfl-emploi'); ?>">
+            <option value="Full time">Full time</option>
+            <option value="Part-time">Part-time</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <select id="select-typedecontract" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Term of employment', 'epfl-emploi'); ?>">
+            <option value="Unlimited (CDI)">Unlimited (CDI)</option>
+            <option value="Fixed-term (CDD)">Fixed-term (CDD)</option>
+          </select>
+        </div>
+      </div>
     </div>
-<?PHP } ?>
 
-    <div id="umantis_iframe">&nbsp;</div>
+    <div class="list">
 
-<?PHP
-/* If filters must appears on the left, */
-    if($filter_pos=='left')
-    {
-?>
+    <?php
+    $job_offers = array_fill(0, 83, '1');
+
+    $i = 0;
+
+    foreach ($job_offers as $job_offer):
+        $i += 1;
+    ?>
+      <div class="job-offer-row pl-2 mb-0 mt-0 pb-3 pt-3 border-bottom border-top align-items-center">
+        <div class="job-offer-row-1 d-md-flex pl-0 pt-0 pb-1">
+          <div class="col-12 small font-weight-bold">
+            <span class="job-offer-fonction">IT Staff</span>
+          </div>
+        </div>
+        <div class="job-offer-row-2 d-md-flex pl-md-1 pt-1 pb-0">
+          <div class="col font-weight-bold h4 mb-1">
+            <a class="job-offer-intitule" href="https://recruiting.epfl.ch/Vacancies/1690/Description/2" target="_blank">Scientific Programmer (W/M) <?= $i ?></a>
+          </div>
+          <div class="col text-md-right">
+            <span class=" job-offer-taux">Full time</span>,&nbsp;<span class="job-offer-typedecontract">Fixed-term (CDD)</span>
+          </div>
+        </div>
+        <div class="job-offer-row-4 d-md-flex pt-md-1 pb-md-0">
+          <div class="col-md-4">School / VP: <span class="job-offer-faculte">ENT-R</span></div>
+
+        </div>
+        <div class="job-offer-row-5 d-md-flex pt-md-0 pb-md-0">
+          <div class="col-md-4">Location: <span class="job-offer-lieu">Geneva</span></div>
+        </div>
+        <div class="job-offer-row-6 d-md-flex pt-md-0 pb-md-0 small">
+          <div class="col-md text-right">
+            <span>Job no. <span class="job-offer-id">1691</span>, </span>
+            <span>online since <span class="job-offer-enlignedepuis font-weight-bold">02/09/2021</span></span>
+          </div>
+        </div>
+      </div>
+
+    <?php
+      endforeach;
+    ?>
+    </div>
+
+    <ul class="pagination"></ul>
+
+  </div>
 </div>
 
-<?php }
-
+<?php
+load_template(dirname(__FILE__).'/list-js-config.php');
 return ob_get_clean();
 }
 
