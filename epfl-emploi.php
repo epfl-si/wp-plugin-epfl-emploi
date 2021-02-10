@@ -2,11 +2,16 @@
 /**
  * Plugin Name: EPFL Emploi
  * Description: provides a shortcode to display job offers
- * Version: 1.8.1
- * Author: Lucien Chaboudez
+ * Version: 2.0.0
+ * Author: Lucien Chaboudez, Julien Delasoie
  * Contributors:
- * License: Copyright (c) 2019 Ecole Polytechnique Federale de Lausanne, Switzerland
+ * License: Copyright (c) 2021 Ecole Polytechnique Federale de Lausanne, Switzerland
  **/
+
+
+namespace EPFL\Plugins\Emploi;
+
+require_once(dirname(__FILE__).'/parse_emplois.php');
 
 
 function epfl_emploi_process_shortcode( $atts, $content = null ) {
@@ -57,89 +62,55 @@ function epfl_emploi_process_shortcode( $atts, $content = null ) {
         wp_enqueue_style( 'epfl_emploi_filter_style', plugin_dir_url(__FILE__).'css/style-filter-top.css' );
     }
 
-    /* Including Script */
-    wp_enqueue_script( 'epfl_emploi_filter_array_emulate', plugin_dir_url(__FILE__).'js/prototype-filter-emulate.js' );
-    wp_enqueue_script( 'epfl_emploi_script', plugin_dir_url(__FILE__).'js/script.js' );
+    $url_parts = parse_url($url);
+    parse_str($url_parts['query'], $all_parameters);
 
-    /* We have to remove all URL parameters named 'searchPosition' to have 'searchPositionUrl' value for JS */
-    $url_query = parse_url($url, PHP_URL_QUERY);
+    #$all_parameters["lang"] = $all_parameters["lang"] ?? $lang_to_id[$lang];
+    $all_parameters["searchPosition"] = $except_positions;
 
-    parse_str($url_query, $parameters);
+    $url_parts['query'] = http_build_query($all_parameters);
+    $url = $url_parts['scheme'] . '://' . $url_parts['host'] . $url_parts['path'] . '?' . $url_parts['query'];
 
-    if(array_key_exists('searchPosition', $parameters))
-    {
-       unset($parameters['searchPosition']);
-    }
-
-    $new_url_query = http_build_query($parameters);
-    /* We replace query in original url to have 'searchPositionUrl' value for JS */
-    $url_search_position = str_replace($url_query, $new_url_query, $url);
+    $job_offers = get_job_offers($url);
 
     ob_start();
 
     /* If filters must appears on the left, */
     if($filter_pos=='left')
     {
-?>
-<div class="container">
+        ?>
+      <div class="container">
 
-    <div class="search-filters">
+      <div class="search-filters">
+    <?PHP } ?>
+
+  <div aria-expanded="true" aria-hidden="false" aria-labelledby="toggle-1" class="list-unstyled toggle-expanded" id="toggle-pane-0">&nbsp;</div>
+
+    <?PHP
+    /* If filters must appears on the left, */
+if($filter_pos=='left')
+{
+    ?>
+  </div>
 <?PHP } ?>
 
-        <div class="panel-content keywords-panel form">
-            <input id="id_keywords" name="keywords" type="text" />
-            <button class="themed search-button keywords-button" name="search" onclick="onSelectionChanged()">
-                <span class="icon-search">&nbsp;</span>
-            </button>
-        </div>
+  <div id="umantis_iframe">&nbsp;<?= $job_offers ?> </div>
 
-        <div aria-expanded="true" aria-hidden="false" aria-labelledby="toggle-1" class="list-unstyled toggle-expanded" id="toggle-pane-0">&nbsp;</div>
-
-        <div class="toolbar-emploi actu-advanced-search-toolbar ui-toolbar" data-widget="toolbar" role="toolbar">
-            <button class="toolbar-item" name="search" onclick="onSelectionChanged()" role="button" tabindex="0"><?PHP echo __('Search', 'epfl-emploi'); ?></button>
-            <button class="toolbar-item right" onclick="reset()"><?PHP echo __('Reset', 'epfl-emploi'); ?></button>
-
-            <!-- URLs -->
-            <input type="hidden" id="EPFLEmploiDefaultUrl" value="<?PHP echo $url; ?>">
-            <input type="hidden" id="EPFLEmploiSearchPositionUrl" value="<?PHP echo $url_search_position; ?>">
-
-            <!-- Parameters -->
-            <input type="hidden" id="EPFLEmploiExceptPositions" value="<?PHP echo $except_positions; ?>">
-
-
-            <!-- Lang & Translations -->
-            <input type="hidden" id="EPFLEmploiLang" value="<?PHP echo $lang_to_id[$lang]; ?>">
-            <input type="hidden" id="EPFLEmploiTransFunction" value="<?PHP echo esc_attr__('Function', 'epfl-emploi'); ?>">
-            <input type="hidden" id="EPFLEmploiTransLocation" value="<?PHP echo esc_attr__('Location', 'epfl-emploi'); ?>">
-            <input type="hidden" id="EPFLEmploiTransWorkRate" value="<?PHP echo esc_attr__('Work Rate', 'epfl-emploi'); ?>">
-            <input type="hidden" id="EPFLEmploiTransEmplTerm" value="<?PHP echo esc_attr__('Term of employment', 'epfl-emploi'); ?>">
-        </div>
-
-<?PHP
-/* If filters must appears on the left, */
+    <?PHP
+    /* If filters must appears on the left, */
     if($filter_pos=='left')
     {
-?>
-    </div>
-<?PHP } ?>
+        ?>
+      </div>
 
-    <div id="umantis_iframe">&nbsp;</div>
+    <?php }
 
-<?PHP
-/* If filters must appears on the left, */
-    if($filter_pos=='left')
-    {
-?>
-</div>
-
-<?php }
-
-return ob_get_clean();
+    return ob_get_clean();
 }
 
 add_action( 'init', function() {
-  // define the shortcode
-  add_shortcode('epfl_emploi', 'epfl_emploi_process_shortcode');
+    // define the shortcode
+    add_shortcode('epfl_emploi', __NAMESPACE__ . '\epfl_emploi_process_shortcode');
 });
 
 // Load .mo file for translation
