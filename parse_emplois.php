@@ -7,25 +7,20 @@ define(__NAMESPACE__ . "\REMOTE_SERVER_SSL", true);  // force the server to be h
 define(__NAMESPACE__ . "\LOCAL_CACHE_NAME", 'EPFL_EMPLOI_OFFERS');  // the option and transient name for the caching
 define(__NAMESPACE__ . "\LOCAL_CACHE_TIMEOUT", 15 * MINUTE_IN_SECONDS);  // cache time validity, in seconds
 
-function load_DOMHTML_silently($html) {
-    $dom = new \DomDocument;
-
-    // We don't really care about errors for this part
-    // modify state
-    $libxml_previous_state = libxml_use_internal_errors(true);
-    // parse
-    $has_loaded_html = $dom->loadHTML($html);
-    // handle errors
-    libxml_clear_errors();
-    // restore
-    libxml_use_internal_errors($libxml_previous_state);
-
-    if ($has_loaded_html === false) {
-        # can't load the html
-        throw new \Exception('Can not parse the provided html for epfl-emploi');
+/**
+ * Remove empty values from JSON decode result
+ */
+function array_filter_recursive($input)
+{
+    foreach ($input as &$value)
+    {
+        if (is_array($value))
+        {
+            $value = array_filter_recursive($value);
+        }
     }
 
-    return $dom;
+    return array_filter($input);
 }
 
 /**
@@ -40,7 +35,8 @@ function parse_job_offers(string $xml_job_offers) {
     $json = json_encode($xml);
     $job_offers = json_decode($json,TRUE);
 
-    # at this point, we should have a nice fullfilled var :)
+    $job_offers = array_filter_recursive(array_values($job_offers)[0]);
+
     return $job_offers;
 }
 
@@ -68,7 +64,7 @@ function echo_job_offers(string $url) {
                 # Remote server is responding; parse it and cache it in transient and option table
                 $remote_xml = wp_remote_retrieve_body($response);
 
-                $job_offers = "<table>" . parse_job_offers($remote_xml) . "</table>";
+                $job_offers = parse_job_offers($remote_xml);
 
                 if (!empty($job_offers)) {
                     set_transient(LOCAL_CACHE_NAME, $job_offers, LOCAL_CACHE_TIMEOUT);
@@ -97,10 +93,52 @@ function echo_job_offers(string $url) {
         }
 
         # add a friendly message about this problem
-        $job_offers = '<p><b><font color="red">The URL provided is having problem. Data can be obsolete. Showing the last working version</font></b></p>' . $job_offers;
+        echo '<p><b><font color="red">The URL provided is having problem. Data can be obsolete. Showing the last working version</font></b></p>';
 
     } finally {
         # show what we built
-        echo $job_offers;
+        foreach ($job_offers as $job_offer):
+
+            $fonction =  $job_offer['Fonction'] ?? '';
+            $intitule =  $job_offer['Intitule'] ?? '';
+            $id =  $job_offer['ID'] ?? '';
+            $type_de_contrat =  $job_offer['TypeDeContrat'] ?? '';
+            $taux =  $job_offer['Taux'] ?? '';
+            $faculte =  $job_offer['Faculte'] ?? '';
+            $lieu =  $job_offer['Lieu'] ?? '';
+            $en_ligne_depuis =  $job_offer['EnLigneDepuis'] ?? '';
+            $url =  $job_offer['URL'] ?? '';
+
+            ?>
+        <div class="job-offer-row pl-2 mb-0 mt-0 pb-3 pt-3 border-bottom border-top align-items-center">
+            <div class="job-offer-row-1 d-md-flex pl-0 pt-0 pb-1">
+                <div class="col-12 small font-weight-bold">
+                    <span class="job-offer-fonction"><?= esc_html($fonction); ?></span>
+                </div>
+            </div>
+            <div class="job-offer-row-2 d-md-flex pl-md-1 pt-1 pb-0">
+                <div class="col font-weight-bold h4 mb-1">
+                    <a class="job-offer-intitule" href="<?= esc_attr($url); ?>" target="_blank"><?= esc_html($intitule); ?></a>
+                </div>
+                <div class="col text-md-right">
+                    <span class=" job-offer-taux"><?= esc_html($taux); ?></span><?php if (!empty($taux) && !empty($type_de_contrat)): ?>,&nbsp;<?php endif; ?><span class="job-offer-typedecontract"><?= esc_html($type_de_contrat); ?></span>
+                </div>
+            </div>
+            <div class="job-offer-row-4 d-md-flex pt-md-1 pb-md-0">
+                <div class="col-md-4">School / VP: <span class="job-offer-faculte"><?= esc_html($faculte); ?></span></div>
+
+            </div>
+            <div class="job-offer-row-5 d-md-flex pt-md-0 pb-md-0">
+                <div class="col-md-4">Location: <span class="job-offer-lieu"><?= esc_html($lieu); ?></span></div>
+            </div>
+            <div class="job-offer-row-6 d-md-flex pt-md-0 pb-md-0 small">
+                <div class="col-md text-right">
+                    <span>Job no. <span class="job-offer-id"><?= esc_html($id); ?></span>, </span>
+                    <span>online since <span class="job-offer-enlignedepuis font-weight-bold"><?= esc_html($en_ligne_depuis); ?></span></span>
+                </div>
+            </div>
+        </div>
+        <?php
+        endforeach;
     }
 }

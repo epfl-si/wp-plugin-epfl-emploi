@@ -38,12 +38,68 @@ function epfl_emploi_process_shortcode( $atts, $content = null ) {
 
     ob_start();
     ?>
-    <div class="container">
-      <?= echo_job_offers($url);?>
+<div class="container my-3">
+  <div id="job-offers-list" class="d-flex flex-column">
+    <div class="form-group">
+      <div class="col">
+        <input
+                type="text"
+                id="job-offers-search-input"
+                class="form-control search mb-2"
+                placeholder="<?= __('Search for a specific job offer...', 'epfl-emploi') ?>"
+                aria-describedby="job-offers-search-input"
+        >
+      </div>
+      <div id="selects-filter" class="d-flex flex-wrap flex-column flex-md-row mb-2">
+        <div class="col-md-3">
+          <select id="select-fonction" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Functions', 'epfl-emploi'); ?>">
+            <option value="Administrative Staff">Administrative Staff</option>
+            <option value="IT Staff">IT Staff</option>
+            <option value="Technical Staff">Technical Staff</option>
+            <option value="Management">Management</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <select id="select-lieu" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Location', 'epfl-emploi'); ?>">
+            <option value="Lausanne">Lausanne</option>
+            <option value="Geneva">Geneva</option>
+            <option value="Fribourg">Fribourg</option>
+            <option value="Neuchâtel">Neuchâtel</option>
+            <option value="Sion">Sion</option>
+            <option value="Basel">Basel</option>
+            <option value="Villigen">Villigen</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <select id="select-taux" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Work Rate', 'epfl-emploi'); ?>">
+            <option value="Full time">Full time</option>
+            <option value="Part-time">Part-time</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <select id="select-typedecontract" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Term of employment', 'epfl-emploi'); ?>">
+            <option value="Unlimited (CDI)">Unlimited (CDI)</option>
+            <option value="Fixed-term (CDD)">Fixed-term (CDD)</option>
+          </select>
+        </div>
+      </div>
     </div>
 
-    <?php
-    return ob_get_clean();
+    <div class="list">
+        <?= echo_job_offers($url);?>
+    </div>
+
+    <ul class="pagination"></ul>
+
+  </div>
+</div>
+
+<?php
+load_template(dirname(__FILE__).'/list-js-config.php');
+return ob_get_clean();
 }
 
 add_action( 'init', function() {
