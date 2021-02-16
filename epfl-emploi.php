@@ -33,78 +33,16 @@ function epfl_emploi_process_shortcode( $atts, $content = null ) {
         return '<b><font color="red">Please provide an URL</font></b>';
     }
 
-    /* Lang to numeric id for JS code */
-    $lang_to_id = array('en' => 2, 'fr' => 3);
-
-    /* If Polylang installed */
-    if(function_exists('pll_current_language'))
-    {
-        $lang = pll_current_language();
-        /* Set in english if not in allowed languages */
-        if(!array_key_exists($lang, $lang_to_id)) $lang = 'en';
-
-    }
-    else /* Polylang not installed */
-    {
-        $lang = 'en';
-    }
-
-
     /* Including CSS file*/
     wp_enqueue_style( 'epfl_emploi_style', plugin_dir_url(__FILE__).'css/style.css' );
 
-    if($filter_pos == 'left')
-    {
-        wp_enqueue_style( 'epfl_emploi_filter_style', plugin_dir_url(__FILE__).'css/style-filter-left.css' );
-    }
-    else
-    {
-        wp_enqueue_style( 'epfl_emploi_filter_style', plugin_dir_url(__FILE__).'css/style-filter-top.css' );
-    }
-
-    $url_parts = parse_url($url);
-    parse_str($url_parts['query'], $all_parameters);
-
-    #$all_parameters["lang"] = $all_parameters["lang"] ?? $lang_to_id[$lang];
-    $all_parameters["searchPosition"] = $except_positions;
-
-    $url_parts['query'] = http_build_query($all_parameters);
-    $url = $url_parts['scheme'] . '://' . $url_parts['host'] . $url_parts['path'] . '?' . $url_parts['query'];
-
-    $job_offers = get_job_offers($url);
-
     ob_start();
-
-    /* If filters must appears on the left, */
-    if($filter_pos=='left')
-    {
-        ?>
-      <div class="container">
-
-      <div class="search-filters">
-    <?PHP } ?>
-
-  <div aria-expanded="true" aria-hidden="false" aria-labelledby="toggle-1" class="list-unstyled toggle-expanded" id="toggle-pane-0">&nbsp;</div>
-
-    <?PHP
-    /* If filters must appears on the left, */
-if($filter_pos=='left')
-{
     ?>
-  </div>
-<?PHP } ?>
+    <div class="container">
+      <?= echo_job_offers($url);?>
+    </div>
 
-  <div id="umantis_iframe">&nbsp;<?= $job_offers ?> </div>
-
-    <?PHP
-    /* If filters must appears on the left, */
-    if($filter_pos=='left')
-    {
-        ?>
-      </div>
-
-    <?php }
-
+    <?php
     return ob_get_clean();
 }
 

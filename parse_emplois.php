@@ -28,10 +28,6 @@ function load_DOMHTML_silently($html) {
     return $dom;
 }
 
-function parse_job_offers_recusively(string $url) {
-
-}
-
 /**
  * @param string $html html to parse
  * @param string $base_url the url used first time to crawlresults
@@ -39,81 +35,13 @@ function parse_job_offers_recusively(string $url) {
  * @throws \Exception
  */
 
-function parse_job_offers(string $html, string $base_url, int $total_count = null) {
-
-    $dom = load_DOMHTML_silently($html);
-    $xpath = new \DomXPath($dom);
-
-    $advanced_information = $xpath->query("//table-navigation[@initial-data-string]/@initial-data-string");
-
-    $job_offers_table = $xpath->query("//table[@class='tableaslist']");
-
-    if (
-        $advanced_information->length == 0 ||
-        $job_offers_table->length == 0
-    ) {
-        # stop here as we can not find needed data
-        throw new \Exception('Can not parse the provided html for epfl-emploi');
-    }
-
-    $job_offers_table = $job_offers_table->item(0)->nodeValue;
-    $advanced_information = json_decode($advanced_information->item(0)->nodeValue);
-
-    $umantis_next_url_parameters = $advanced_information->NextLink->EnhancedUrl ?? null;
-    $table_max_entries = $advanced_information->TableMaxEntries ?? null;
-    $table_from = $advanced_information->TableFrom ?? null;
-    $table_to = $advanced_information->TableTo ?? null;
-    $token_list_id = $advanced_information->token_list_id ?? null;
-    $search_token = $advanced_information->search_token ?? null;
-
-    if (
-        $umantis_next_url_parameters === NULL ||
-        $table_max_entries === NULL ||
-        $table_from === NULL ||
-        $table_to === NULL ||
-        $token_list_id === NULL ||
-        $search_token === NULL
-    ) {
-        # stop here as we can not find needed data
-        throw new \Exception('Can not parse the provided html for epfl-emploi');
-    }
-
-    if ($total_count === NULL) {
-        # fetch total, so we know when to stop
-        $total_url = strtok($base_url, '?') . '/getTableTotalCount?token_list_id='. $token_list_id;
-
-        $response = wp_remote_get($total_url, array('timeout' => REMOTE_SERVER_TIMEOUT, 'sslverify' => REMOTE_SERVER_SSL));
-
-        if (is_wp_error($response)) {
-            # unwanted error, throw it to get a fallback
-            throw new \Exception($response->get_error_message());
-        } else {
-            # Remote server is responding; Hooray !
-            $remote_count_json = wp_remote_retrieve_body($response);
-            $total_count = intval(json_decode($remote_count_json)->data);
-        }
-    }
-
-    # check if need more or stop here
-    if ($table_to < $total_count) {
-        # we have to continue, we have more results !
-        # Build next url
-        $next_url = strtok($base_url, '?') . $umantis_next_url_parameters;
-        $response = wp_remote_get($next_url, array('timeout' => REMOTE_SERVER_TIMEOUT, 'sslverify' => REMOTE_SERVER_SSL));
-
-        if (is_wp_error($response)) {
-            # unwanted error, throw it to get a fallback
-            throw new \Exception($response->get_error_message());
-        } else {
-            # Remote server is responding; Hooray !
-            $remote_html = wp_remote_retrieve_body($response);
-            # compile results of results
-            $job_offers_table .= parse_job_offers($remote_html, $base_url, $total_count);
-        }
-    }
+function parse_job_offers(string $xml_job_offers) {
+    $xml = simplexml_load_string($xml_job_offers, "SimpleXMLElement", LIBXML_NOCDATA);
+    $json = json_encode($xml);
+    $job_offers = json_decode($json,TRUE);
 
     # at this point, we should have a nice fullfilled var :)
-    return $job_offers_table;
+    return $job_offers;
 }
 
 /**
@@ -123,7 +51,7 @@ function parse_job_offers(string $html, string $base_url, int $total_count = nul
  * @param string $url where to fetch all job offers in html
  * @return array the job offers or null if server is not responding
  */
-function get_job_offers(string $url) {
+function echo_job_offers(string $url) {
     $job_offers = null;
 
     try {
@@ -138,10 +66,9 @@ function get_job_offers(string $url) {
                 throw new \Exception($response->get_error_message());
             } else {
                 # Remote server is responding; parse it and cache it in transient and option table
-                $remote_html = wp_remote_retrieve_body($response);
+                $remote_xml = wp_remote_retrieve_body($response);
 
-                $job_offers = "<table>" . parse_job_offers($remote_html, $url, null) . "</table>";
-
+                $job_offers = "<table>" . parse_job_offers($remote_xml) . "</table>";
 
                 if (!empty($job_offers)) {
                     set_transient(LOCAL_CACHE_NAME, $job_offers, LOCAL_CACHE_TIMEOUT);
@@ -157,6 +84,7 @@ function get_job_offers(string $url) {
     } catch (\Exception $e) {
         # Remote server is not responding or there is a general error, get the local option and
         # set a transient, so we dont refresh until the LOCAL_CACHE_TIMEOUT time
+
         $data_from_option = get_option(LOCAL_CACHE_NAME);
         if ($data_from_option === false) {
             # so we don't have option as fallback.. set transient to nothing as a refresh
@@ -167,8 +95,12 @@ function get_job_offers(string $url) {
             set_transient(LOCAL_CACHE_NAME, $data_from_option, LOCAL_CACHE_TIMEOUT);
             $job_offers = $data_from_option;
         }
+
+        # add a friendly message about this problem
+        $job_offers = '<p><b><font color="red">The URL provided is having problem. Data can be obsolete. Showing the last working version</font></b></p>' . $job_offers;
+
     } finally {
-        # whatever return what we have
-        return $job_offers;
+        # show what we built
+        echo $job_offers;
     }
 }
