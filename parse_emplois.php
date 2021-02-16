@@ -125,16 +125,16 @@ function echo_job_offers(string $url) {
                 </div>
             </div>
             <div class="job-offer-row-4 d-md-flex pt-md-1 pb-md-0">
-                <div class="col-md-4">School / VP: <span class="job-offer-faculte"><?= esc_html($faculte); ?></span></div>
+                <div class="col-md-4"><?= __('School / VP:', 'epfl-emploi') ?>&nbsp;<span class="job-offer-faculte"><?= esc_html($faculte); ?></span></div>
 
             </div>
             <div class="job-offer-row-5 d-md-flex pt-md-0 pb-md-0">
-                <div class="col-md-4">Location: <span class="job-offer-lieu"><?= esc_html($lieu); ?></span></div>
+                <div class="col-md-4"><?= __('Location:', 'epfl-emploi') ?>&nbsp;<span class="job-offer-lieu"><?= esc_html($lieu); ?></span></div>
             </div>
             <div class="job-offer-row-6 d-md-flex pt-md-0 pb-md-0 small">
                 <div class="col-md text-right">
-                    <span>Job no. <span class="job-offer-id"><?= esc_html($id); ?></span>, </span>
-                    <span>online since <span class="job-offer-enlignedepuis font-weight-bold"><?= esc_html($en_ligne_depuis); ?></span></span>
+                    <span><?= __('Job no.', 'epfl-emploi') ?>&nbsp;<span class="job-offer-id"><?= esc_html($id); ?></span>, </span>
+                    <span><?= __('online since', 'epfl-emploi') ?>&nbsp;<span class="job-offer-enlignedepuis font-weight-bold"><?= esc_html($en_ligne_depuis); ?></span></span>
                 </div>
             </div>
         </div>

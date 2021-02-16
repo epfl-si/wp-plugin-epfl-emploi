@@ -32,3 +32,17 @@ msgstr "Type de contrat"
 
 msgid "Search for a specific job offer..."
 msgstr "Rechercher une offre de travail spécifique..."
+
+
+msgid "School / VP:"
+msgstr "Faculté / VP :"
+
+msgid "Location:"
+msgstr "Lieu : "
+
+msgid "Job no."
+msgstr "Poste no."
+
+msgid "online since"
+
+msgstr "en ligne depuis le"
