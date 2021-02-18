@@ -31,7 +31,16 @@ function array_filter_recursive($input)
  */
 
 function parse_job_offers(string $xml_job_offers) {
+    $use_errors = libxml_use_internal_errors(true);
     $xml = simplexml_load_string($xml_job_offers, "SimpleXMLElement", LIBXML_NOCDATA);
+
+    if (false === $xml) {
+        throw new \Exception("Cannot load xml source.");
+    }
+
+    libxml_clear_errors();
+    libxml_use_internal_errors($use_errors);
+
     $json = json_encode($xml);
     $job_offers = json_decode($json,TRUE);
 
@@ -85,7 +94,7 @@ function get_job_offers(string $url) {
         if ($data_from_option === false) {
             # so we don't have option as fallback.. set transient to nothing as a refresh
             set_transient(LOCAL_CACHE_NAME, [], LOCAL_CACHE_TIMEOUT);
-            $job_offers = null;
+            $job_offers = [];
         } else {
             # update transient with what we got in option
             set_transient(LOCAL_CACHE_NAME, $data_from_option, LOCAL_CACHE_TIMEOUT);
@@ -93,7 +102,7 @@ function get_job_offers(string $url) {
         }
 
         # add a friendly message about this problem
-        echo '<p><b><font color="red">The URL provided is having problem. Data can be obsolete. Showing the last working version</font></b></p>';
+        echo '<p><b><font color="red">The URL provided is having problem. Data shown here may be obsolete.</font></b></p>';
 
     } finally {
         return $job_offers;

@@ -17,11 +17,6 @@ function echo_job_offers_list($job_offers) {
 
     foreach ($job_offers as $job_offer):
         $fonction =  $job_offer['Fonction'] ?? '';
-        // fonction can have multiple values, seperated by comma
-        if (!empty($fonction)) {
-          $fonctions = explode(',', $fonction);
-        }
-
         $intitule =  $job_offer['Intitule'] ?? '';
         $id =  $job_offer['ID'] ?? '';
         $type_de_contrat =  $job_offer['TypeDeContrat'] ?? '';
@@ -34,11 +29,7 @@ function echo_job_offers_list($job_offers) {
       <div class="job-offer-row pl-2 mb-0 mt-0 pb-3 pt-3 border-bottom border-top align-items-center">
         <div class="job-offer-row-1 d-md-flex pl-0 pt-0 pb-1">
           <div class="col-12 small font-weight-bold">
-          <?php
-          $last_fonction = end($fonctions);
-          foreach ($fonctions as $one_fonction): ?>
-            <span class="job-offer-fonction"><?= esc_html($one_fonction); ?></span><?php if ($one_fonction != $last_fonction):?>, <?php endif ?>
-          <?php endforeach; ?>
+            <span class="job-offer-fonction"><?= esc_html($fonction); ?></span>
           </div>
         </div>
         <div class="job-offer-row-2 d-md-flex pl-md-1 pt-1 pb-0">
@@ -70,6 +61,9 @@ function echo_job_offers_list($job_offers) {
 
 
 function process_array_for_select_options($job_offers, $key) {
+    if (empty($job_offers)) {
+      return [];
+    }
     $uniq = array_unique(array_column($job_offers, $key));
     sort($uniq);
     return $uniq ?? [];
@@ -129,52 +123,54 @@ function epfl_emploi_process_shortcode( $atts, $content = null ) {
 <div class="container my-3">
   <div id="job-offers-list" class="d-flex flex-column">
     <div class="form-group">
-      <div class="col">
-        <input
-                type="text"
-                id="job-offers-search-input"
-                class="form-control search mb-2"
-                placeholder="<?= __('Search for a specific job offer...', 'epfl-emploi') ?>"
-                aria-describedby="job-offers-search-input"
-        >
-      </div>
-      <div id="selects-filter" class="d-flex flex-wrap flex-column flex-md-row mb-2">
-        <div class="col-md-3">
-          <select id="select-fonction" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Functions', 'epfl-emploi'); ?>">
-            <?php foreach ($fonctions_select_options as $fonction_option): ?>
-              <option value="<?= esc_attr($fonction_option) ?>"><?= esc_html($fonction_option) ?></option>
-            <?php endforeach; ?>
-          </select>
+      <form id="job-offers-form">
+        <div class="col">
+          <input
+                  type="text"
+                  id="job-offers-search-input"
+                  class="form-control search mb-2"
+                  placeholder="<?= __('Search for a specific job offer...', 'epfl-emploi') ?>"
+                  aria-describedby="job-offers-search-input"
+          >
         </div>
-
-        <div class="col-md-3">
-          <select id="select-lieu" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Location', 'epfl-emploi'); ?>">
-              <?php foreach ($lieu_select_options as $lieu_option): ?>
-                <option value="<?= esc_attr($lieu_option) ?>"><?= esc_html($lieu_option) ?></option>
+        <div id="selects-filter" class="d-flex flex-wrap flex-column flex-md-row mb-2">
+          <div class="col-md-3">
+            <select id="select-fonction" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Functions', 'epfl-emploi'); ?>">
+              <?php foreach ($fonctions_select_options as $fonction_option): ?>
+                <option value="<?= esc_attr($fonction_option) ?>"><?= esc_html($fonction_option) ?></option>
               <?php endforeach; ?>
-          </select>
-        </div>
+            </select>
+          </div>
 
-        <div class="col-md-3">
-          <select id="select-taux" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Work Rate', 'epfl-emploi'); ?>">
-              <?php foreach ($taux_select_options as $taux_option): ?>
-                <option value="<?= esc_attr($taux_option) ?>"><?= esc_html($taux_option) ?></option>
-              <?php endforeach; ?>
-          </select>
-        </div>
+          <div class="col-md-3">
+            <select id="select-lieu" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Location', 'epfl-emploi'); ?>">
+                <?php foreach ($lieu_select_options as $lieu_option): ?>
+                  <option value="<?= esc_attr($lieu_option) ?>"><?= esc_html($lieu_option) ?></option>
+                <?php endforeach; ?>
+            </select>
+          </div>
 
-        <div class="col-md-3">
-          <select id="select-typedecontract" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Term of employment', 'epfl-emploi'); ?>">
-              <?php foreach ($type_de_contrat_select_options as $taux_option): ?>
-                <option value="<?= esc_attr($taux_option) ?>"><?= esc_html($taux_option) ?></option>
-              <?php endforeach; ?>
-          </select>
+          <div class="col-md-3">
+            <select id="select-taux" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Work Rate', 'epfl-emploi'); ?>">
+                <?php foreach ($taux_select_options as $taux_option): ?>
+                  <option value="<?= esc_attr($taux_option) ?>"><?= esc_html($taux_option) ?></option>
+                <?php endforeach; ?>
+            </select>
+          </div>
+
+          <div class="col-md-3">
+            <select id="select-typedecontract" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Term of employment', 'epfl-emploi'); ?>">
+                <?php foreach ($type_de_contrat_select_options as $taux_option): ?>
+                  <option value="<?= esc_attr($taux_option) ?>"><?= esc_html($taux_option) ?></option>
+                <?php endforeach; ?>
+            </select>
+          </div>
         </div>
-      </div>
+      </form>
     </div>
 
     <div class="list">
-        <?= echo_job_offers_list($job_offers); ?>
+        <?= !empty($job_offers) ? echo_job_offers_list($job_offers) : ''; ?>
     </div>
 
     <ul class="pagination"></ul>
