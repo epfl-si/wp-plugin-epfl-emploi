@@ -44,5 +44,10 @@ msgid "Job no."
 msgstr "Poste no."
 
 msgid "online since"
-
 msgstr "en ligne depuis le"
+
+msgid "[Select All]"
+msgstr "[Tout sélectionner]"
+
+msgid "All selected"
+msgstr "Tout sélectionné"

@@ -116,9 +116,50 @@
 
       var jobOffersList = new List('job-offers-list', options);
 
-      // set events
+      // set config and events for selects
       for (let i = 0; filter_field_select_map.length > i; i++) {
         let select = filter_field_select_map[i][1];
+
+
+        <?php
+        # check if need to redo the label in french version
+          function get_current_or_default_language() {
+              $default_lang = 'en';
+              $allowed_langs = array('en', 'fr');
+              $language = $default_lang;
+
+              /* If Polylang installed */
+              if(function_exists('pll_current_language'))
+              {
+                  $current_lang = pll_current_language('slug');
+                  // Check if current lang is supported. If not, use default lang
+                  $language = (in_array($current_lang, $allowed_langs)) ? $current_lang : $default_lang;
+              } else {
+                  $lang = get_bloginfo("language");
+
+                  if ($lang === 'fr-FR') {
+                      $language = 'fr';
+                  }
+              }
+
+              return $language;
+          }
+
+          if (get_current_or_default_language() != 'en'):
+        ?>
+        // recreate select for the good language
+        $(select).multipleSelect('destroy').multipleSelect({
+          placeholder: $(select).attr('data-placeholder') || '',
+          width: '100%',
+          formatSelectAll: function () {
+            return '<?= __('[Select All]', 'epfl-emploi') ?>'
+          },
+          formatAllSelected: function () {
+            return '<?= __('All selected', 'epfl-emploi') ?>'
+          }
+        })
+        <?php endif; ?>
+
         $(select).change(function (e) {
           applyFilter(jobOffersList);
         });
