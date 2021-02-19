@@ -61,7 +61,9 @@ function get_job_offers(string $url) {
 
     try {
         # First, check if we have a transient
-        if ( (defined('WP_DEBUG') && WP_DEBUG) || false === ( $job_offers = get_transient( LOCAL_CACHE_NAME ) ) ) {
+        $cache_key = LOCAL_CACHE_NAME . md5(serialize($url));
+
+        if ( (defined('WP_DEBUG') && WP_DEBUG) || false === ( $job_offers = get_transient( $cache_key ) ) ) {
             # no transient, then try to get some data
 
             $response = wp_remote_get($url, array('timeout' => REMOTE_SERVER_TIMEOUT, 'sslverify' => REMOTE_SERVER_SSL));
@@ -76,13 +78,13 @@ function get_job_offers(string $url) {
                 $job_offers = parse_job_offers($remote_xml);
 
                 if (!empty($job_offers)) {
-                    set_transient(LOCAL_CACHE_NAME, $job_offers, LOCAL_CACHE_TIMEOUT);
+                    set_transient($cache_key, $job_offers, LOCAL_CACHE_TIMEOUT);
                     # persist into options too, as a fallback if remote server get down
-                    update_option(LOCAL_CACHE_NAME, $job_offers);
+                    update_option($cache_key, $job_offers);
                 } else {
                     # nothing or empty result has been returned from the server, reset local entries
-                    set_transient(LOCAL_CACHE_NAME, [], LOCAL_CACHE_TIMEOUT);
-                    delete_option(LOCAL_CACHE_NAME);
+                    set_transient($cache_key, [], LOCAL_CACHE_TIMEOUT);
+                    delete_option($cache_key);
                 }
             }
         }
@@ -90,14 +92,14 @@ function get_job_offers(string $url) {
         # Remote server is not responding or there is a general error, get the local option and
         # set a transient, so we dont refresh until the LOCAL_CACHE_TIMEOUT time
 
-        $data_from_option = get_option(LOCAL_CACHE_NAME);
+        $data_from_option = get_option($cache_key);
         if ($data_from_option === false) {
             # so we don't have option as fallback.. set transient to nothing as a refresh
-            set_transient(LOCAL_CACHE_NAME, [], LOCAL_CACHE_TIMEOUT);
+            set_transient($cache_key, [], LOCAL_CACHE_TIMEOUT);
             $job_offers = [];
         } else {
             # update transient with what we got in option
-            set_transient(LOCAL_CACHE_NAME, $data_from_option, LOCAL_CACHE_TIMEOUT);
+            set_transient($cache_key, $data_from_option, LOCAL_CACHE_TIMEOUT);
             $job_offers = $data_from_option;
         }
 
