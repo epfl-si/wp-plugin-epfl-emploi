@@ -109,6 +109,7 @@
           'job-offer-lieu',
           'job-offer-taux',
           'job-offer-typedecontract',
+					'job-offer-id',
         ],
         page: 20,
         pagination: true
