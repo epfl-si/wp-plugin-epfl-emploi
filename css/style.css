@@ -1,3 +1,18 @@
+
+#job-offers-list .list {
+	font-size: 0.95rem;
+}
+
+.job-offer-fonction {
+	font-weight: bold;
+	font-size: 0.85rem;
+}
+
+.job-offer-intitule {
+	font-weight: bold;
+	font-size: 1.2rem;
+}
+
 .job-offer-row:nth-of-type(odd) {
 	background-color: #E6E6E6;
 }

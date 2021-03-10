@@ -27,30 +27,24 @@ function echo_job_offers_list($job_offers) {
         $url =  $job_offer['URL'] ?? '';
 ?>
       <div class="job-offer-row pl-2 mb-0 mt-0 pb-3 pt-2 border-bottom border-top align-items-center">
-        <div class="job-offer-row-1 d-md-flex pl-0 pt-0 pb-1">
-          <div class="col-12 small font-weight-bold">
+        <div class="job-offer-row-1 d-md-flex pl-0 pt-1 pb-0">
+          <div class="col-12">
             <span class="job-offer-fonction"><?= esc_html($fonction); ?></span>
           </div>
         </div>
-        <div class="job-offer-row-2 d-md-flex pl-md-1 pt-1 pb-0">
-          <div class="col font-weight-bold h4 mb-1">
+        <div class="job-offer-row-2 d-md-flex pl-md-1 pt-1 pb-1">
+          <div class="col mb-0 align-middle">
             <a class="job-offer-intitule" href="<?= esc_attr($url); ?>" target="_blank"><?= esc_html($intitule); ?></a>
           </div>
-          <div class="col text-md-right">
-            <span class="job-offer-taux"><?= esc_html($taux); ?></span><?php if (!empty($taux) && !empty($type_de_contrat)): ?>,&nbsp;<?php endif; ?><span class="job-offer-typedecontract"><?= esc_html($type_de_contrat); ?></span>
+          <div class="col text-md-right align-middle">
+            <span class="job-offer-taux"><?= esc_html($taux); ?></span><?php if (!empty($taux) && !empty($type_de_contrat)): ?>&nbsp;&ndash;<?php endif; ?><span class="job-offer-typedecontract"><?= esc_html($type_de_contrat); ?></span>
           </div>
         </div>
-        <div class="job-offer-row-4 d-md-flex pt-md-1 pb-md-0">
-          <div class="col-md-4"><?= __('School / VP:', 'epfl-emploi') ?>&nbsp;<span class="job-offer-faculte"><?= esc_html($faculte); ?></span></div>
-
-        </div>
-        <div class="job-offer-row-5 d-md-flex pt-md-0 pb-md-0">
-          <div class="col-md-4"><?= __('Location:', 'epfl-emploi') ?>&nbsp;<span class="job-offer-lieu"><?= esc_html($lieu); ?></span></div>
-        </div>
-        <div class="job-offer-row-6 d-md-flex pt-md-0 pb-md-0 small">
-          <div class="col-md text-right">
-            <span><?= __('Job no.', 'epfl-emploi') ?>&nbsp;<span class="job-offer-id"><?= esc_html($id); ?></span>, </span>
-            <span><?= __('online since', 'epfl-emploi') ?>&nbsp;<span class="job-offer-enlignedepuis font-weight-bold"><?= esc_html($en_ligne_depuis); ?></span></span>
+        <div class="job-offer-row-3 d-md-flex pl-md-1">
+          <div class="col-12">
+            <span><?= __('Location:', 'epfl-emploi') ?>&nbsp;<span class="job-offer-lieu"><?= esc_html($lieu); ?></span></span>&nbsp;&nbsp;|&nbsp;
+            <span><?= __('Job no.', 'epfl-emploi') ?>&nbsp;<span class="job-offer-id"><?= esc_html($id); ?></span></span>&nbsp;&nbsp;|&nbsp;
+            <span><?= __('online since', 'epfl-emploi') ?>&nbsp;<span class="job-offer-enlignedepuis"><?= esc_html($en_ligne_depuis); ?></span></span>
           </div>
         </div>
       </div>
