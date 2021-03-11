@@ -85,6 +85,8 @@ function process_fonctions_for_select_options($job_offers) {
 
 function epfl_emploi_process_shortcode( $atts, $content = null ) {
 
+    wp_enqueue_script( 'epfl_emploi_list_script', plugin_dir_url(__FILE__).'js/list.min.js' );
+
     $atts = shortcode_atts( array(
         'url' => '',
         'except_positions' => '',
@@ -167,8 +169,9 @@ function epfl_emploi_process_shortcode( $atts, $content = null ) {
         <?= !empty($job_offers) ? echo_job_offers_list($job_offers) : ''; ?>
     </div>
 
-    <ul class="pagination"></ul>
-
+    <nav aria-label="Page navigation">
+      <ul class="pagination"></ul>
+    </nav>
   </div>
 </div>
 

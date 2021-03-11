@@ -112,7 +112,11 @@
 					'job-offer-id',
         ],
         page: 20,
-        pagination: true
+				pagination: [{
+					innerWindow: 2,
+					outerWindow: 1,
+					item: "<li class='page-item'><a class='page page-link' href='#'></a></li>"
+				}]
       };
 
       var jobOffersList = new List('job-offers-list', options);
