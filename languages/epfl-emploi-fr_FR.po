@@ -36,6 +36,9 @@ msgstr "Rechercher par mots-clés.."
 msgid "School / VP:"
 msgstr "Faculté / VP :"
 
+msgid "Function:"
+msgstr "Fonction :"
+
 msgid "Location:"
 msgstr "Lieu : "
 

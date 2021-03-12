@@ -27,12 +27,12 @@ function echo_job_offers_list($job_offers) {
         $url =  $job_offer['URL'] ?? '';
 ?>
       <div class="job-offer-row pl-2 mb-0 mt-0 pb-3 pt-2 border-bottom border-top align-items-center">
-        <div class="job-offer-row-1 d-md-flex pl-0 pt-1 pb-0">
+        <div class="job-offer-row-1 d-md-flex pl-md-0 pt-1 pb-0">
           <div class="col-12">
-            <span class="job-offer-fonction"><?= esc_html($fonction); ?></span>
+            <span><?= __('online since', 'epfl-emploi') ?>&nbsp;<span class="job-offer-enlignedepuis"><?= esc_html($en_ligne_depuis); ?></span></span>
           </div>
         </div>
-        <div class="job-offer-row-2 d-md-flex pl-md-1 pt-1 pb-1">
+        <div class="job-offer-row-2 d-md-flex pl-md-0 pt-1 pb-1">
           <div class="col mb-0 align-middle">
             <a class="job-offer-intitule" href="<?= esc_attr($url); ?>" target="_blank"><?= esc_html($intitule); ?></a>
           </div>
@@ -40,11 +40,11 @@ function echo_job_offers_list($job_offers) {
             <span class="job-offer-taux"><?= esc_html($taux); ?></span><?php if (!empty($taux) && !empty($type_de_contrat)): ?>&nbsp;&ndash;<?php endif; ?><span class="job-offer-typedecontract"><?= esc_html($type_de_contrat); ?></span>
           </div>
         </div>
-        <div class="job-offer-row-3 d-md-flex pl-md-1">
+        <div class="job-offer-row-3 d-md-flex pl-md-0">
           <div class="col-12">
-            <span><?= __('Location:', 'epfl-emploi') ?>&nbsp;<span class="job-offer-lieu"><?= esc_html($lieu); ?></span></span>&nbsp;&nbsp;|&nbsp;
-            <span><?= __('Job no.', 'epfl-emploi') ?>&nbsp;<span class="job-offer-id"><?= esc_html($id); ?></span></span>&nbsp;&nbsp;|&nbsp;
-            <span><?= __('online since', 'epfl-emploi') ?>&nbsp;<span class="job-offer-enlignedepuis"><?= esc_html($en_ligne_depuis); ?></span></span>
+            <span><?= __('Function:', 'epfl-emploi') ?>&nbsp;<span class="job-offer-fonction"><?= esc_html($fonction); ?></span></span><?= (!empty($lieu)) ? '&nbsp;&nbsp;|&nbsp;' : ''  ?>
+            <span><?= __('Location:', 'epfl-emploi') ?>&nbsp;<span class="job-offer-lieu"><?= esc_html($lieu); ?></span></span><?= (!empty($id)) ? '&nbsp;&nbsp;|&nbsp;' : ''  ?>
+            <span><?= __('Job no.', 'epfl-emploi') ?>&nbsp;<span class="job-offer-id"><?= esc_html($id); ?></span></span>
           </div>
         </div>
       </div>
@@ -105,7 +105,7 @@ function epfl_emploi_process_shortcode( $atts, $content = null ) {
     }
 
     /* Including CSS file*/
-    wp_enqueue_style( 'epfl_emploi_style', plugin_dir_url(__FILE__).'css/style.css' );
+    wp_enqueue_style( 'epfl_emploi_style', plugin_dir_url(__FILE__).'css/style.css', [], '2.0');
 
     $job_offers = get_job_offers($url);
 
@@ -131,7 +131,7 @@ function epfl_emploi_process_shortcode( $atts, $content = null ) {
         </div>
         <div id="selects-filter" class="d-flex flex-wrap flex-column flex-md-row mb-2">
           <div class="col-md-3 px-0 pr-md-1 pl-md-0 mb-2">
-            <select id="select-fonction" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Functions', 'epfl-emploi'); ?>">
+            <select id="select-fonction" class="select-multiple" multiple="multiple" data-placeholder="<?= __('Function', 'epfl-emploi'); ?>">
               <?php foreach ($fonctions_select_options as $fonction_option): ?>
                 <option value="<?= esc_attr($fonction_option) ?>"><?= esc_html($fonction_option) ?></option>
               <?php endforeach; ?>

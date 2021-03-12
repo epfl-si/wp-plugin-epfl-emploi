@@ -111,7 +111,7 @@
           'job-offer-typedecontract',
 					'job-offer-id',
         ],
-        page: 20,
+        page: 12,
 				pagination: [{
 					innerWindow: 2,
 					outerWindow: 1,
