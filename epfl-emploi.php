@@ -105,7 +105,7 @@ function epfl_emploi_process_shortcode( $atts, $content = null ) {
     }
 
     /* Including CSS file*/
-    wp_enqueue_style( 'epfl_emploi_style', plugin_dir_url(__FILE__).'css/style.css', [], '2.0');
+    wp_enqueue_style( 'epfl_emploi_style', plugin_dir_url(__FILE__).'css/style.css', [], '2.1');
 
     $job_offers = get_job_offers($url);
 
