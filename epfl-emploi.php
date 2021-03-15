@@ -125,7 +125,7 @@ function epfl_emploi_process_shortcode( $atts, $content = null ) {
                   type="text"
                   id="job-offers-search-input"
                   class="form-control search mb-2"
-                  placeholder="<?= __('Search by keywords..', 'epfl-emploi') ?>"
+                  placeholder="<?= __('Search by keywords', 'epfl-emploi') ?>"
                   aria-describedby="job-offers-search-input"
           >
         </div>

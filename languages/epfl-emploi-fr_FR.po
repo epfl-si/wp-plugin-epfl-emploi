@@ -30,8 +30,8 @@ msgstr "Taux d'occupation"
 msgid "Term of employment"
 msgstr "Type de contrat"
 
-msgid "Search by keywords.."
-msgstr "Rechercher par mots-clés.."
+msgid "Search by keywords"
+msgstr "Rechercher par mots-clés"
 
 msgid "School / VP:"
 msgstr "Faculté / VP :"
