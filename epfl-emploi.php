@@ -2,7 +2,7 @@
 /**
  * Plugin Name: EPFL Emploi
  * Description: provides a shortcode to display job offers
- * Version: 2.0.0
+ * Version: 2.0.1
  * Author: Lucien Chaboudez, Julien Delasoie
  * Contributors:
  * License: Copyright (c) 2021 Ecole Polytechnique Federale de Lausanne, Switzerland
@@ -72,8 +72,9 @@ function process_fonctions_for_select_options($job_offers) {
           $splitted  = explode(',', $fonctions_option);
 
           foreach ($splitted as $fonction) {
+              $fonction = trim($fonction);
               if (!in_array($fonction, $splitted_fonctions_select_options)) {
-                  $splitted_fonctions_select_options[] = trim($fonction);
+                  $splitted_fonctions_select_options[] = $fonction;
               }
           }
       }
