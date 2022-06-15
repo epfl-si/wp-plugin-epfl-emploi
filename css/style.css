@@ -22,3 +22,13 @@
 .pagination > li {
 	margin-right: 4px;
 }
+
+/* Fix having a red square at the start in the dropdown list elements */
+.select-multiple div.ms-drop ul > li::before {
+	background: initial ! important;
+}
+
+/* Fix having a red square at the start in the dropdown list elements */
+.select-multiple div.ms-drop label {
+	padding-left: 0 ! important;
+}
