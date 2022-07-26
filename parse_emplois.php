@@ -66,7 +66,9 @@ function get_job_offers(string $url) {
         if ( (defined('WP_DEBUG') && WP_DEBUG) || false === ( $job_offers = get_transient( $cache_key ) ) ) {
             # no transient, then try to get some data
 
+            $start = microtime(true);
             $response = wp_remote_get($url, array('timeout' => REMOTE_SERVER_TIMEOUT, 'sslverify' => REMOTE_SERVER_SSL));
+            $end = microtime(true);
 
             if (is_wp_error($response)) {
                 # unwanted error, throw it to get a fallback
@@ -86,7 +88,17 @@ function get_job_offers(string $url) {
                     set_transient($cache_key, [], LOCAL_CACHE_TIMEOUT);
                     delete_option($cache_key);
                 }
+
+              // Finally, log the response time
+              if (has_action('epfl_stats_webservice_call_duration')) {
+                do_action('epfl_stats_webservice_call_duration', $url, $end-$start);
+              }
             }
+        } else {
+          // Log response time as cache hit
+          if (has_action('epfl_stats_webservice_call_duration')) {
+            do_action('epfl_stats_webservice_call_duration', $url, 0, true);
+          }
         }
     } catch (\Exception $e) {
         # Remote server is not responding or there is a general error, get the local option and
