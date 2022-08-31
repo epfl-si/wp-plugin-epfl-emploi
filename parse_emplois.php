@@ -44,7 +44,23 @@ function parse_job_offers(string $xml_job_offers) {
     $json = json_encode($xml);
     $job_offers = json_decode($json,TRUE);
 
-    $job_offers = array_filter_recursive(array_values($job_offers)[0]);
+    $job_offers = array_filter_recursive(array_values($job_offers)[0]);  // clean array from his empty fields
+
+    // order by date
+    usort($job_offers, function ($job1, $job2) {
+        $ymd1 = date_create_from_format('d.m.Y', $job1['EnLigneDepuis']);
+        $ymd2 = date_create_from_format('d.m.Y', $job2['EnLigneDepuis']);
+
+        if (!$ymd1) {
+            return 1;
+        }
+
+        if (!$ymd2) {
+            return -1;
+        }
+
+        return $ymd2 <=> $ymd1;
+    });
 
     return $job_offers;
 }
